@@ -1,8 +1,15 @@
+server:
+  port: 8080
 
 example:
   kafka:
     consumer-enabled: ${consumer-enabled:true}
 spring:
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+      discovery:
+        enabled: true
   kafka:
     bootstrap-servers: ${kafka_bootstrap_servers:localhost:9092}
     properties:
@@ -14,7 +21,6 @@ spring:
         protocol: SASL_PLAINTEXT
     producer:
       client-id: sensor-producer
-      group-id: group_id
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       retries: 2
