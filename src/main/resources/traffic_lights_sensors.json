@@ -1,0 +1,11 @@
+[
+  {
+    "sensorId": "11",
+    "sensorType": "TRAFFIC_LIGHT"
+  },
+  {
+    "sensorId": "12",
+    "sensorType": "TRAFFIC_LIGHT"
+  }
+
+]

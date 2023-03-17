@@ -1,40 +1,97 @@
 package com.tcs.sensor.data.producer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tcs.sensor.data.model.RoadSensorDataValue;
 import com.tcs.sensor.data.model.SensorData;
 import com.tcs.sensor.data.model.SensorType;
-import lombok.RequiredArgsConstructor;
+import com.tcs.sensor.data.model.TrafficLightsSensorDataValue;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.tcs.sensor.data.model.TrafficLightsSensorDataValue.*;
+
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class MessageSendTask {
 
-    public static final List<String> sensorIds = Arrays.asList("ID_1", "ID_2");
-
-    private final SensorDataProducer producer;
     private final Map<String, SensorData> sensorCache = new HashMap<>();
 
-    @Scheduled(fixedRateString = "3000")
-    public void sendMessage() {
-        SensorData sensorData = sensorCache.computeIfAbsent("ID_1", k -> SensorData.builder().sensorId(k).sensorType(SensorType.ROAD_SENSOR).build());
+    private List<SensorData> roadSensors;
+    private List<SensorData> lightSensors;
 
-        sensorData.setTimestamp(LocalDateTime.now());
-        Random random = new Random();
-        //boolean available = random.nextBoolean();
-        boolean available = true;
+    private final SensorDataProducer producer;
 
-        sensorData.setAvailable(available);
-        if (available) {
-            sensorData.setDataValue(RoadSensorDataValue.randomValue().name());
-        } else {
-            sensorData.setDataValue(null);
+    private TrafficLightsSensorDataValue currentLight = randomValue();
+
+    @Autowired
+    public MessageSendTask(SensorDataProducer producer) {
+        this.producer = producer;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            InputStream roadSensorsFile = getClass().getClassLoader().getResourceAsStream("road_sensors.json");
+            InputStream trafficLightsFile = getClass().getClassLoader().getResourceAsStream("traffic_lights_sensors.json");
+            //File roadSensorsFile = new File("road_sensors.json");
+            //File trafficLightsFile = new File("traffic_lights_sensors.json");
+
+            roadSensors = objectMapper.readValue(roadSensorsFile, new TypeReference<>() {
+            });
+            lightSensors = objectMapper.readValue(trafficLightsFile, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
 
-        producer.sendTopic(sensorData);
+    }
+
+    @Scheduled(fixedRateString = "5000")
+    public void sendRoadSensorsData() {
+        for (SensorData sensorData : roadSensors) {
+
+            sensorData.setTimestamp(LocalDateTime.now());
+            //Random random = new Random();
+            //boolean available = random.nextBoolean();
+            boolean available = true;
+
+            sensorData.setAvailable(available);
+            if (available) {
+                sensorData.setDataValue(RoadSensorDataValue.randomValue().name());
+            } else {
+                sensorData.setDataValue(null);
+            }
+
+            producer.sendTopic(sensorData);
+        }
+    }
+
+    @Scheduled(fixedRateString = "10000")
+    public void sendTrafficLightSensorsData() {
+        for (SensorData sensorData : lightSensors) {
+
+            sensorData.setTimestamp(LocalDateTime.now());
+            //Random random = new Random();
+            //boolean available = random.nextBoolean();
+            boolean available = true;
+
+            sensorData.setAvailable(available);
+            if (available) {
+                TrafficLightsSensorDataValue data = currentLight.equals(RED) ? GREEN : RED;
+                sensorData.setDataValue(data.name());
+                currentLight = data;
+            } else {
+                sensorData.setDataValue(null);
+            }
+
+            producer.sendTopic(sensorData);
+        }
     }
 }

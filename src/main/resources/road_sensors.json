@@ -1,0 +1,43 @@
+[
+  {
+    "sensorId": "1",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "2",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "3",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "4",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "5",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "6",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "7",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "8",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "9",
+    "sensorType": "ROAD_SENSOR"
+  },
+  {
+    "sensorId": "10",
+    "sensorType": "ROAD_SENSOR"
+  }
+
+]
